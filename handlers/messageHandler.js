@@ -55,12 +55,22 @@ async function serialize(sock, msg) {
   const command = isCmd ? (args.shift() || "").toLowerCase() : "";
 
   const sender = msg.key.participant || msg.key.remoteJid;
+  const isLid = (sender || "").endsWith("@lid");
+
   // WhatsApp Multi-Device kadang mengirim JID dengan suffix device ID,
   // contoh: "6288975485211:45@s.whatsapp.net". Suffix ":45" itu HARUS
   // dibuang, kalau tidak perbandingan dengan OWNER_NUMBER akan selalu
   // gagal walau nomornya sebenarnya sama persis.
   const senderNumber = (sender || "").split("@")[0].split(":")[0];
   const ownerNumberClean = config.ownerNumber.replace(/[^0-9]/g, "");
+  const ownerLidClean = config.ownerLid.replace(/[^0-9]/g, "");
+
+  // Sebagian akun WhatsApp disamarkan pakai ID privasi "xxxxx@lid"
+  // (bukan nomor telepon asli). Untuk kasus ini, cocokkan lewat
+  // OWNER_LID yang dikonfigurasi manual (lihat hasil /whoami).
+  const isOwnerMatch = isLid
+    ? ownerLidClean && senderNumber === ownerLidClean
+    : senderNumber === ownerNumberClean;
 
   const quotedRaw = getQuotedRawMessage(msg);
 
@@ -74,7 +84,7 @@ async function serialize(sock, msg) {
     args,
     text: args.join(" "),
     body: bodyRaw,
-    isOwner: senderNumber === ownerNumberClean,
+    isOwner: isOwnerMatch,
     quoted: quotedRaw,
 
     react: async (emoji) => {
@@ -134,16 +144,20 @@ async function routeCommand(sock, m) {
   switch (m.command) {
     case "whoami": {
       const config = require("../config");
+      const isLid = m.sender.endsWith("@lid");
       const text =
         `🔍 *DEBUG INFO*\n\n` +
         `• Raw sender JID   : \`${m.sender}\`\n` +
-        `• Raw remoteJid    : \`${m.raw.key.remoteJid}\`\n` +
+        `• Tipe ID          : \`${isLid ? "LID (ID privasi)" : "Nomor telepon biasa"}\`\n` +
         `• Raw participant  : \`${m.raw.key.participant || "(kosong)"}\`\n` +
         `• fromMe           : \`${m.raw.key.fromMe}\`\n` +
-        `• Nomor terdeteksi : \`${m.sender.split("@")[0].split(":")[0]}\`\n` +
+        `• Nomor/ID terdeteksi : \`${m.sender.split("@")[0].split(":")[0]}\`\n` +
         `• OWNER_NUMBER env : \`${config.ownerNumber}\`\n` +
-        `• OWNER_NUMBER bersih : \`${config.ownerNumber.replace(/[^0-9]/g, "")}\`\n` +
-        `• Status isOwner   : \`${m.isOwner}\``;
+        `• OWNER_LID env    : \`${config.ownerLid || "(belum diisi)"}\`\n` +
+        `• Status isOwner   : \`${m.isOwner}\`\n\n` +
+        (isLid
+          ? `💡 ID kamu terdeteksi LID. Kalau isOwner masih *false*, isi \`OWNER_LID=${m.sender.split("@")[0].split(":")[0]}\` di environment variables lalu redeploy.`
+          : `💡 ID kamu nomor telepon biasa. Pastikan OWNER_NUMBER persis sama dengan nomor terdeteksi di atas.`);
       return sock.sendMessage(m.chat, { text }, { quoted: m.raw });
     }
 
@@ -231,4 +245,4 @@ async function handleMessage(sock, msg) {
 }
 
 module.exports = { handleMessage };
-      
+  
