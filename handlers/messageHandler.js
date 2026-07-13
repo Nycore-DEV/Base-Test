@@ -55,7 +55,11 @@ async function serialize(sock, msg) {
   const command = isCmd ? (args.shift() || "").toLowerCase() : "";
 
   const sender = msg.key.participant || msg.key.remoteJid;
-  const senderNumber = (sender || "").split("@")[0];
+  // WhatsApp Multi-Device kadang mengirim JID dengan suffix device ID,
+  // contoh: "6288975485211:45@s.whatsapp.net". Suffix ":45" itu HARUS
+  // dibuang, kalau tidak perbandingan dengan OWNER_NUMBER akan selalu
+  // gagal walau nomornya sebenarnya sama persis.
+  const senderNumber = (sender || "").split("@")[0].split(":")[0];
   const ownerNumberClean = config.ownerNumber.replace(/[^0-9]/g, "");
 
   const quotedRaw = getQuotedRawMessage(msg);
