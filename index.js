@@ -9,6 +9,7 @@ const {
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
+  Browsers,
 } = require("@whiskeysockets/baileys");
 const { Boom } = require("@hapi/boom");
 const pino = require("pino");
@@ -36,7 +37,7 @@ async function startBot() {
     logger: pino({ level: "silent" }),
     auth: state,
     printQRInTerminal: false,
-    browser: [config.botName, "Chrome", "1.0.0"],
+    browser: Browsers.ubuntu("Chrome"),
   });
 
   // ── Pairing Code (tanpa scan QR) ───────────────────────────────
@@ -61,6 +62,18 @@ async function startBot() {
     if (connection === "close") {
       const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode;
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+      // Jika belum pernah berhasil registrasi (masih dalam proses pairing),
+      // JANGAN auto-reconnect — itu akan membuat sesi baru + kode baru,
+      // sehingga kode yang sedang diketik user langsung invalid.
+      if (!sock.authState.creds.registered) {
+        logger.error(
+          "CONNECTION",
+          "Koneksi terputus saat proses pairing. Jalankan ulang aplikasi secara manual untuk mendapatkan kode baru."
+        );
+        return;
+      }
+
       logger.warn("CONNECTION", `Koneksi terputus. Reconnect: ${shouldReconnect}`);
       if (shouldReconnect) startBot();
       else logger.error("CONNECTION", "Sesi logout. Hapus folder ./session lalu jalankan ulang untuk pairing baru.");
