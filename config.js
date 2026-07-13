@@ -15,8 +15,13 @@ module.exports = {
   botVersion: "1.0.0",
 
   ownerName: process.env.OWNER_NAME || "Owner Nycore",
-  ownerNumber: process.env.OWNER_NUMBER || "6288975485211", // format 62xxxx tanpa "+"
-  botNumber: process.env.BOT_NUMBER || "6287855074673",
+  ownerNumber: process.env.OWNER_NUMBER || "6281234567890", // format 62xxxx tanpa "+"
+  // WhatsApp terkadang menyamarkan nomor asli pengirim dengan ID acak
+  // berformat "xxxxx@lid" (fitur privasi WhatsApp). Kalau itu terjadi,
+  // isi OWNER_LID dengan angka yang muncul di hasil /whoami (bagian
+  // sebelum "@lid") supaya bot tetap mengenali kamu sebagai Owner.
+  ownerLid: process.env.OWNER_LID || "",
+  botNumber: process.env.BOT_NUMBER || "",
 
   prefix: process.env.PREFIX || "/",
   timezone: process.env.TIMEZONE || "Asia/Jakarta",
