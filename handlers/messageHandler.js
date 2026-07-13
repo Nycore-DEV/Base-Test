@@ -132,6 +132,21 @@ function guessExt(mimetype = "") {
 /** Router command -> handler */
 async function routeCommand(sock, m) {
   switch (m.command) {
+    case "whoami": {
+      const config = require("../config");
+      const text =
+        `🔍 *DEBUG INFO*\n\n` +
+        `• Raw sender JID   : \`${m.sender}\`\n` +
+        `• Raw remoteJid    : \`${m.raw.key.remoteJid}\`\n` +
+        `• Raw participant  : \`${m.raw.key.participant || "(kosong)"}\`\n` +
+        `• fromMe           : \`${m.raw.key.fromMe}\`\n` +
+        `• Nomor terdeteksi : \`${m.sender.split("@")[0].split(":")[0]}\`\n` +
+        `• OWNER_NUMBER env : \`${config.ownerNumber}\`\n` +
+        `• OWNER_NUMBER bersih : \`${config.ownerNumber.replace(/[^0-9]/g, "")}\`\n` +
+        `• Status isOwner   : \`${m.isOwner}\``;
+      return sock.sendMessage(m.chat, { text }, { quoted: m.raw });
+    }
+
     case "menu":
     case "help":
     case "start":
@@ -216,3 +231,4 @@ async function handleMessage(sock, msg) {
 }
 
 module.exports = { handleMessage };
+      
