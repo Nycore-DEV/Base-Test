@@ -1,0 +1,27 @@
+{
+  "name": "nycore-bot",
+  "version": "1.0.0",
+  "description": "Nycore Bot — Bot WhatsApp Auto Order untuk Nycore Studio (jasa Custom Minecraft Plugin). Otomatis 24 jam: pilih produk, bayar QRIS via Order Kuota, verifikasi, kirim produk.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.9",
+    "axios": "^1.7.7",
+    "better-sqlite3": "^11.3.0",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "moment-timezone": "^0.5.45",
+    "pino": "^9.4.0",
+    "qrcode": "^1.5.4",
+    "qs": "^6.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+node_modules/
+session/
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
+logs/*.log
+products_files/*
+!products_files/.gitkeep
+.env
+npm-debug.log*
