@@ -46,7 +46,7 @@ async function startRestock(sock, m) {
 
 /** Dipanggil oleh messageHandler untuk setiap pesan teks lanjutan selama sesi restock aktif */
 async function handleRestockAnswer(sock, m, sess) {
-  const text = (m.text || "").trim();
+  const text = (m.body || "").trim();
 
   if (/^batal$/i.test(text)) {
     session.clear(m.sender);
